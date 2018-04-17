@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration scan="false">
+	<property name="LOG-FILE-NAME" value="${user.dir}/logs/log" />
+	
+	<appender name="console" class="ch.qos.logback.core.ConsoleAppender">
+		<encoder>
+			<pattern>%date{HH:mm:ss.SSS} [%thread] %-5level %logger{36}[%method] - %msg%n</pattern>
+		</encoder>
+	</appender>
+
+	<appender name="DEBUG" class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<file>${LOG-FILE-NAME}-debug.log</file>
+		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+			<fileNamePattern>${LOG-FILE-NAME}-debug.%d{yyyy-MM-dd}.log</fileNamePattern>
+		</rollingPolicy>
+		<encoder>
+			<pattern>%date{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+		</encoder>
+		<filter class="ch.qos.logback.classic.filter.LevelFilter">  
+		    <level>DEBUG</level>  
+		    <onMatch>ACCEPT</onMatch>  
+		    <onMismatch>DENY</onMismatch>  
+		</filter>
+	</appender>
+	
+	<appender name="INFO" class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<file>${LOG-FILE-NAME}-info.log</file>
+		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+			<fileNamePattern>${LOG-FILE-NAME}-info.%d{yyyy-MM-dd}.log</fileNamePattern>
+		</rollingPolicy>
+		<encoder>
+			<pattern>%date{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+		</encoder>
+		<filter class="ch.qos.logback.classic.filter.LevelFilter">  
+		    <level>INFO</level>  
+		    <onMatch>ACCEPT</onMatch>  
+		    <onMismatch>DENY</onMismatch>  
+		</filter>
+	</appender>
+	
+	<appender name="WARN" class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<file>${LOG-FILE-NAME}-warn.log</file>
+		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+			<fileNamePattern>${LOG-FILE-NAME}-warn.%d{yyyy-MM-dd}.log</fileNamePattern>
+		</rollingPolicy>
+		<encoder>
+			<pattern>%date{HH:mm:ss.SSS} [%thread] %-5level %logger{36}[%method] - %msg%n</pattern>
+		</encoder>
+		<filter class="ch.qos.logback.classic.filter.LevelFilter">  
+		    <level>WARN</level>  
+		    <onMatch>ACCEPT</onMatch>  
+		    <onMismatch>DENY</onMismatch>  
+		</filter>
+	</appender>
+	
+	<appender name="ERROR" class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<file>${LOG-FILE-NAME}-error.log</file>
+		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+			<fileNamePattern>${LOG-FILE-NAME}-error.%d{yyyy-MM-dd}.log</fileNamePattern>
+		</rollingPolicy>
+		<encoder>
+			<pattern>%date{HH:mm:ss.SSS} [%thread] %-5level %logger{36}[%method] - %msg%n</pattern>
+		</encoder>
+		<filter class="ch.qos.logback.classic.filter.LevelFilter">  
+		    <level>ERROR</level>  
+		    <onMatch>ACCEPT</onMatch>  
+		    <onMismatch>DENY</onMismatch>  
+		</filter>
+	</appender>
+
+	<!-- project default level -->
+	
+	<logger name="org.springframework" level="INFO" />
+	<logger name="org.springframework.web" level="INFO" />
+	<logger name="org.hibernate" level="INFO" />
+	<logger name="org.apache.shiro" level="WARN" />
+	<logger name="org.apache.http" level="INFO" />
+	
+	<logger name="druid.sql.DataSource" level="WARN" />
+	<logger name="druid.sql.Connection" level="WARN" />
+	<logger name="druid.sql.Statement" level="DEBUG" />
+	<logger name="druid.sql.ResultSet" level="WARN" />
+	
+	<logger name="org.hibernate.procedure.internal.ProcedureCallImpl" level="ERROR" />
+	<logger name="org.springframework.web.HttpRequestMethodNotSupportedException" level="OFF" />
+	<logger name="com.amazonaws.services.s3.internal.Mimetypes" level="OFF" />
+	<logger name="com.amazonaws.http.conn.ssl.SdkTLSSocketFactory" level="OFF" />
+
+	<root level="INFO">
+		<!-- <appender-ref ref="console" /> -->
+		<appender-ref ref="DEBUG" />
+		<appender-ref ref="INFO" />
+		<appender-ref ref="WARN" />
+		<appender-ref ref="ERROR" />
+	</root>
+</configuration>
