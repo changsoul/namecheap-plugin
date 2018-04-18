@@ -52,7 +52,7 @@ public class HeadersInterceptor implements HttpRequestInterceptor {
 			request.addHeader("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8");
 		}
 
-		request.addHeader("Accept-Language", "zh-CN,zh;q=0.8,ja;q=0.6,en;q=0.4");
+		request.addHeader("Accept-Language", "en-US,en;q=0.8");
 		request.addHeader("Cache-Control", "no-cache");
 		request.addHeader("Pragma", "no-cache");
 		
