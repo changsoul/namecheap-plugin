@@ -32,13 +32,17 @@ import com.wudaosoft.net.httpclient.Request;
  */
 public class RestApi {
 	
-	public static final String TEXT_RECORD_TYPE = "5";
+	public static final int TEXT_RECORD_TYPE = 5;
 	
 	private static final String LOGIN_PAGE_URL = "https://www.namecheap.com/myaccount/login.aspx?ReturnUrl=%2fdashboard";
 	
 	private static final String SESSION_HANDLER_AJAX_URL = "https://www.namecheap.com/cart/ajax/SessionHandler.ashx?_=";
 	
 	private static final String GET_DOMAIN_LIST_AJAX_URL = "/Domains/GetDomainList";
+	
+	private static final String ADVANCED_DNS_LIST_PAGE_URL = "/domains/domaincontrolpanel/%s/advancedns";
+	
+	private static final String ADVANCED_DNS_SEC_ADD_UPDATE_RECORD_MODAL_PAGE_URL = "/Domains/Dns/GetAdvancedDNSDnsSecAddUpdateRecordModal";
 	
 	private static final String GET_ADVANCED_DNS_INFO_AJAX_URL = "/Domains/dns/GetAdvancedDnsInfo";
 	
@@ -50,31 +54,31 @@ public class RestApi {
 
 	private String password;
 
-	private HttpClientContext sessioin;
+	private HttpClientContext session;
 
 	private Request request;
 	
-	public HttpClientContext getSessioin() {
-		return sessioin;
+	public HttpClientContext getSession() {
+		return session;
 	}
 
 	public RestApi(String username, String password) {
 		this.username = username;
 		this.password = password;
-		this.sessioin = HttpClientContext.create();
-		this.request = Request.createDefault(HostConfigBuilder.create("https://ap.www.namecheap.com")
-				.setUserAgent(
-						"Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/64.0.3282.186 Mobile Safari/537.36")
-				.build());
+		this.session = HttpClientContext.create();
+		this.request = Request.custom()
+				.setHostConfig(HostConfigBuilder.create("https://ap.www.namecheap.com").build())
+				.setRequestInterceptor(new HeadersInterceptor())
+				.build();
 	}
 	
 	public String loginPage() throws Exception {
-		return request.get(LOGIN_PAGE_URL).withContext(sessioin).execute();
+		return request.get(LOGIN_PAGE_URL).withContext(session).execute();
 	}
 	
 	public Map<String, String> loginParams() throws Exception {
 		
-		JSONObject obj = request.get(SESSION_HANDLER_AJAX_URL + new Date().getTime()).withAjax().withContext(sessioin).json();
+		JSONObject obj = request.get(SESSION_HANDLER_AJAX_URL + new Date().getTime()).withAjax().withContext(session).json();
 		
 		String html = loginPage();
 		Document doc = Jsoup.parse(html);
@@ -92,16 +96,30 @@ public class RestApi {
 		
 		Map<String, String> params = loginParams();
 		
-		int code = request.post(LOGIN_PAGE_URL, params).withContext(sessioin).noResult();
+		int code = request.post(LOGIN_PAGE_URL, params).withContext(session).noResult();
 		
 		return code == 301;
+	}
+	
+	public String getAdvancedDnsListPage(String domainName) throws Exception {
+		
+		String rs = request.get(String.format(ADVANCED_DNS_LIST_PAGE_URL, domainName)).withContext(session).execute();
+		
+		return rs;
+	}
+	
+	public String getAdvancedDNSDnsSecAddUpdateRecordModalPage() throws Exception {
+		
+		String rs = request.get(ADVANCED_DNS_SEC_ADD_UPDATE_RECORD_MODAL_PAGE_URL).withContext(session).execute();
+		
+		return rs;
 	}
 	
 	public JSONArray getDomainList() throws Exception {
 		
 		String payLoad = "{\"gridStateModel\":{\"ServerChunkSize\":1000,\"LastAvailableChunkIndex\":0,\"IsLazyLoading\":true,\"TotalServerItemsCount\":null},\"isOverViewPage\":\"true\"}";
 		
-		JSONObject obj = request.post(GET_DOMAIN_LIST_AJAX_URL).withStringBody(payLoad).withAjax().withContext(sessioin).json();
+		JSONObject obj = request.post(GET_DOMAIN_LIST_AJAX_URL).withStringBody(payLoad).withAjax().withContext(session).json();
 		
 		return obj.getJSONObject("Result").getJSONArray("Data");
 	}
@@ -112,29 +130,29 @@ public class RestApi {
 		params.put("domainName", "woailoli.com");
 		params.put("fillTransferInfo", "false");
 		
-		JSONObject obj = request.get(GET_ADVANCED_DNS_INFO_AJAX_URL, params).withAjax().withContext(sessioin).json();
+		JSONObject obj = request.get(GET_ADVANCED_DNS_INFO_AJAX_URL, params).withAjax().withContext(session).json();
 		
 		return obj.getJSONObject("Result").getJSONObject("CustomHostRecords").getJSONArray("Records");
 	}
 	
-	public boolean removeDomainDnsRecord(String hostId, String recordType, String domainName) throws Exception {
+	public boolean removeDomainDnsRecord(int hostId, int recordType, String domainName) throws Exception {
 		
-		Map<String, Object> params = new HashMap<>();
+		JSONObject params = new JSONObject(true);
 		params.put("hostId", hostId);
 		params.put("recordType", recordType);
 		params.put("domainName", domainName);
 		
 		String payLoad = JSON.toJSONString(params);
 		
-		JSONObject obj = request.post(REMOVE_DOMAIN_DNS_RECORD_AJAX_URL).withStringBody(payLoad).withAjax().withContext(sessioin).json();
+		JSONObject obj = request.post(REMOVE_DOMAIN_DNS_RECORD_AJAX_URL).withStringBody(payLoad).withAjax().withContext(session).json();
 		
 		return "true".equals(obj.get("Result"));
 	}
 	
-	public int addOrUpdateHostRecord(String host, String value, String recordType, String domainName) throws Exception {
+	public int addOrUpdateHostRecord(String host, String value, int recordType, String domainName) throws Exception {
 		
-		Map<String, Object> params = new HashMap<>();
-		Map<String, Object> model = new HashMap<>();
+		JSONObject params = new JSONObject(true);
+		JSONObject model = new JSONObject(true);
 		
 		model.put("HostId", -1);
 		model.put("Host", host);
@@ -148,7 +166,9 @@ public class RestApi {
 		
 		String payLoad = JSON.toJSONString(params);
 		
-		JSONObject obj = request.post(ADD_OR_UPDATE_HOST_RECORD_AJAX_URL).withStringBody(payLoad).withAjax().withContext(sessioin).json();
+		System.out.println("addOrUpdateHostRecord payLoad:" + payLoad);
+		
+		JSONObject obj = request.post(ADD_OR_UPDATE_HOST_RECORD_AJAX_URL).withStringBody(payLoad).withAjax().withContext(session).json();
 		
 		System.out.println("addOrUpdateHostRecord result:" + obj);
 		
