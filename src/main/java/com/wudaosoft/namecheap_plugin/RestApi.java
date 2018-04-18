@@ -23,6 +23,7 @@ import org.jsoup.select.Elements;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.wudaosoft.namecheap_plugin.net.HeadersInterceptor;
 import com.wudaosoft.net.httpclient.HostConfigBuilder;
 import com.wudaosoft.net.httpclient.Request;
 
@@ -37,6 +38,8 @@ public class RestApi {
 	private static final String LOGIN_PAGE_URL = "https://www.namecheap.com/myaccount/login.aspx?ReturnUrl=%2fdashboard";
 	
 	private static final String SESSION_HANDLER_AJAX_URL = "https://www.namecheap.com/cart/ajax/SessionHandler.ashx?_=";
+	
+	private static final String GET_DOMAIN_LIST_PAGE_URL = "/";
 	
 	private static final String GET_DOMAIN_LIST_AJAX_URL = "/Domains/GetDomainList";
 	
@@ -115,6 +118,13 @@ public class RestApi {
 		return rs;
 	}
 	
+	public String getDomainListPage() throws Exception {
+		
+		String rs = request.get(GET_DOMAIN_LIST_PAGE_URL).withContext(session).execute();
+		
+		return rs;
+	}
+	
 	public JSONArray getDomainList() throws Exception {
 		
 		String payLoad = "{\"gridStateModel\":{\"ServerChunkSize\":1000,\"LastAvailableChunkIndex\":0,\"IsLazyLoading\":true,\"TotalServerItemsCount\":null},\"isOverViewPage\":\"true\"}";
@@ -135,6 +145,32 @@ public class RestApi {
 		return obj.getJSONObject("Result").getJSONObject("CustomHostRecords").getJSONArray("Records");
 	}
 	
+	public boolean hasDomainName(JSONArray domainList, String domainName) throws Exception {
+		domainName = domainName.toLowerCase();
+		
+		for(int i = 0; i < domainList.size(); i++) {
+			String item = domainList.getString(i);
+			if(item.contains(domainName)) {
+				return true;
+			}
+		}
+		
+		return false;
+	}
+	
+	public int getDnsHostId(String key, int recordType) throws Exception {
+		JSONArray arr = getAdvancedDnsInfo();
+		
+		for(int i = 0; i < arr.size(); i++) {
+			JSONObject obj = arr.getJSONObject(i);
+			if(key.equals(obj.getString("Host")) && recordType == obj.getIntValue("RecordType")) {
+				obj.getIntValue("HostId"); 
+			}
+		}
+		
+		return -1;
+	}
+	
 	public boolean removeDomainDnsRecord(int hostId, int recordType, String domainName) throws Exception {
 		
 		JSONObject params = new JSONObject(true);
@@ -149,12 +185,12 @@ public class RestApi {
 		return "true".equals(obj.get("Result"));
 	}
 	
-	public int addOrUpdateHostRecord(String host, String value, int recordType, String domainName) throws Exception {
+	public int addOrUpdateHostRecord(int hostId, String host, String value, int recordType, String domainName) throws Exception {
 		
 		JSONObject params = new JSONObject(true);
 		JSONObject model = new JSONObject(true);
 		
-		model.put("HostId", -1);
+		model.put("HostId", hostId);
 		model.put("Host", host);
 		model.put("Data", value);
 		model.put("RecordType", recordType);
@@ -162,7 +198,7 @@ public class RestApi {
 		
 		params.put("model", model);
 		params.put("domainName", domainName);
-		params.put("isAddNewProcess", true);
+		params.put("isAddNewProcess", hostId == -1 ? true : false);
 		
 		String payLoad = JSON.toJSONString(params);
 		
