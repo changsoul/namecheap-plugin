@@ -27,8 +27,6 @@ import org.apache.http.client.protocol.HttpClientContext;
 import org.apache.http.protocol.HttpContext;
 
 /**
- * 设置请求头并按规则排序
- * 
  * @author changsoul.wu
  *
  */
