@@ -19,10 +19,13 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.wudaosoft.namecheap_plugin.env.Base58;
 import com.wudaosoft.namecheap_plugin.net.HeadersInterceptor;
 import com.wudaosoft.net.httpclient.HostConfigBuilder;
 import com.wudaosoft.net.httpclient.Request;
@@ -34,6 +37,8 @@ import com.wudaosoft.net.httpclient.Request;
 public class RestApi {
 	
 	public static final int TEXT_RECORD_TYPE = 5;
+	
+	private static final Logger log = LoggerFactory.getLogger(RestApi.class);
 	
 	private static final String LOGIN_PAGE_URL = "https://www.namecheap.com/myaccount/login.aspx?ReturnUrl=%2fdashboard";
 	
@@ -53,6 +58,8 @@ public class RestApi {
 	
 	private static final String ADD_OR_UPDATE_HOST_RECORD_AJAX_URL = "/Domains/dns/AddOrUpdateHostRecord";
 
+	private static final int TIME_OUT = 1000 * 50;
+	
 	private String username;
 
 	private String password;
@@ -66,11 +73,14 @@ public class RestApi {
 	}
 
 	public RestApi(String username, String password) {
-		this.username = username;
-		this.password = password;
+		this.username = Base58.decodeToString(username);
+		this.password = Base58.decodeToString(password);
 		this.session = HttpClientContext.create();
 		this.request = Request.custom()
-				.setHostConfig(HostConfigBuilder.create("https://ap.www.namecheap.com").build())
+				.setHostConfig(HostConfigBuilder.create("https://ap.www.namecheap.com")
+						.setConnectTimeout(TIME_OUT)
+						.setSocketTimeout(TIME_OUT)
+						.build())
 				.setRequestInterceptor(new HeadersInterceptor())
 				.build();
 	}
@@ -164,10 +174,10 @@ public class RestApi {
 		for(int i = 0; i < arr.size(); i++) {
 			JSONObject obj = arr.getJSONObject(i);
 			if(key.equals(obj.getString("Host")) && recordType == obj.getIntValue("RecordType")) {
-				obj.getIntValue("HostId"); 
+				return obj.getIntValue("HostId"); 
 			}
 		}
-		
+
 		return -1;
 	}
 	
@@ -202,13 +212,12 @@ public class RestApi {
 		
 		String payLoad = JSON.toJSONString(params);
 		
-		System.out.println("addOrUpdateHostRecord payLoad:" + payLoad);
+		log.debug("addOrUpdateHostRecord payLoad:" + payLoad);
 		
 		JSONObject obj = request.post(ADD_OR_UPDATE_HOST_RECORD_AJAX_URL).withStringBody(payLoad).withAjax().withContext(session).json();
 		
-		System.out.println("addOrUpdateHostRecord result:" + obj);
+		log.debug("addOrUpdateHostRecord result:" + obj);
 		
 		return obj.getJSONArray("Result").getJSONObject(0).getIntValue("HostId");
 	}
-
 }

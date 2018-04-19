@@ -10,6 +10,7 @@ logs/
 .DS_Store
 *.iml
 .flattened-pom.xml
+dependency-reduced-pom.xml
 
 *.class
 
