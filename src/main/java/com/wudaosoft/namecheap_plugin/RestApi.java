@@ -144,10 +144,10 @@ public class RestApi {
 		return obj.getJSONObject("Result").getJSONArray("Data");
 	}
 	
-	public JSONArray getAdvancedDnsInfo() throws Exception {
+	public JSONArray getAdvancedDnsInfo(String domainName) throws Exception {
 		
 		Map<String, String> params = new HashMap<>();
-		params.put("domainName", "woailoli.com");
+		params.put("domainName", domainName);
 		params.put("fillTransferInfo", "false");
 		
 		JSONObject obj = request.get(GET_ADVANCED_DNS_INFO_AJAX_URL, params).withAjax().withContext(session).json();
@@ -168,8 +168,8 @@ public class RestApi {
 		return false;
 	}
 	
-	public int getDnsHostId(String key, int recordType) throws Exception {
-		JSONArray arr = getAdvancedDnsInfo();
+	public int getDnsHostId(String domainName, String key, int recordType) throws Exception {
+		JSONArray arr = getAdvancedDnsInfo(domainName);
 		
 		for(int i = 0; i < arr.size(); i++) {
 			JSONObject obj = arr.getJSONObject(i);
