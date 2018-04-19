@@ -11,7 +11,6 @@ logs/
 *.iml
 .flattened-pom.xml
 dependency-reduced-pom.xml
-App.java
 
 *.class
 
