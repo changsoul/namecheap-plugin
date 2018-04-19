@@ -1,0 +1,40 @@
+
+
+certbot certonly --register-unsafely-without-email --manual --preferred-challenges=dns --manual-auth-hook /var/local/script/plugin/authenticator.sh --manual-cleanup-hook /var/local/script/plugin/cleanup.sh -d woailoli.com -d *.woailoli.com --server https://acme-v02.api.letsencrypt.org/directory
+
+
+certbot renew --deploy-hook "systemctl reload nginx"
+
+
+crontab -e
+0 0,12 * * * python -c 'import random; import time; time.sleep(random.random() * 3600)' && certbot renew
+
+systemctl start crond
+启动cron服务
+systemctl stop crond
+停止cron服务
+systemctl restart crond
+重启cron服务
+systemctl enable crond.service
+
+设置cron开机启动
+
+
+
+查看当前crontab，输入 crontab -l
+
+编辑当前crontab，输入 crontab -e
+
+删除当前crontab，输入 crontab  -r
+
+ 
+
+添加定时任务
+
+crontab -e
+0 */1 * * * command
+0 */2 * * * command
+查询任务是否添加：
+
+crontab -l -u root 
+
