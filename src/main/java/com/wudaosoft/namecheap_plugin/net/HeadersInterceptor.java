@@ -17,11 +17,12 @@ package com.wudaosoft.namecheap_plugin.net;
 
 import java.io.IOException;
 
+import org.apache.http.HttpEntityEnclosingRequest;
 import org.apache.http.HttpException;
+import org.apache.http.HttpHost;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpRequestInterceptor;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.client.protocol.HttpClientContext;
 import org.apache.http.protocol.HttpContext;
@@ -62,22 +63,21 @@ public class HeadersInterceptor implements HttpRequestInterceptor {
 		if(_ncCompliance != null)
 			request.addHeader("_NcCompliance", _ncCompliance);
 
+		HttpHost target = (HttpHost)context.getAttribute(HttpClientContext.HTTP_TARGET_HOST);
+		String origin = target.getSchemeName() + "://" + target.getHostName();
 		HttpUriRequest ur = (HttpUriRequest) request;
+		
 		if (request.containsHeader("X-Requested-With")) {
-			if (request instanceof HttpUriRequest && HttpPost.METHOD_NAME.equals(ur.getMethod())) {
+			if (request instanceof HttpEntityEnclosingRequest) {
 				
-//				URI uri = ur.getURI();
-//				
-//				String origin = uri.getScheme() + "://" + uri.getHost();
-				
-				request.addHeader("Origin", "https://ap.www.namecheap.com");
+				request.addHeader("Origin", origin);
 			} else {
 				request.setHeader("Accept", "text/javascript, application/javascript, application/ecmascript, application/x-ecmascript, */*; q=0.01");
 			}
 			
 		} else if(HttpGet.METHOD_NAME.equals(ur.getMethod())) {
 			referer = ur.getURI().toString();
-			referer = referer.startsWith("http") ? referer : "https://ap.www.namecheap.com" + referer;
+			referer = !referer.startsWith("http") ? origin + referer : referer;
 		}
 		
 		request.setHeader("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/64.0.3282.167 Safari/537.36");
