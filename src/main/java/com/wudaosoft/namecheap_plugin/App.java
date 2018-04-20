@@ -78,7 +78,7 @@ public class App {
 
 				api.getAdvancedDnsListPage(domainName);
 
-				int hostId = api.getDnsHostId(keys.get(0), RestApi.TEXT_RECORD_TYPE);
+				int hostId = api.getDnsHostId(domainName, keys.get(0), RestApi.TEXT_RECORD_TYPE);
 
 				String action = hostId == -1 ? "Add" : "Update";
 
@@ -103,7 +103,7 @@ public class App {
 
 				api.getAdvancedDnsListPage(domainName);
 
-				int hostId = api.getDnsHostId(keys.get(0), RestApi.TEXT_RECORD_TYPE);
+				int hostId = api.getDnsHostId(domainName, keys.get(0), RestApi.TEXT_RECORD_TYPE);
 
 				if (hostId == -1) {
 					System.out.println("Remove text record fail. The domainName[" + domainName + "] text record dosen't exist.");

@@ -1,6 +1,6 @@
 
 
-certbot certonly --register-unsafely-without-email --manual --preferred-challenges=dns --manual-auth-hook /var/local/script/plugin/authenticator.sh --manual-cleanup-hook /var/local/script/plugin/cleanup.sh -d woailoli.com -d *.woailoli.com --server https://acme-v02.api.letsencrypt.org/directory
+certbot certonly --register-unsafely-without-email --manual --rsa-key-size 4096 --preferred-challenges=dns --manual-auth-hook /var/local/script/plugin/authenticator.sh --manual-cleanup-hook /var/local/script/plugin/cleanup.sh -d wudaosoft.com -d *.wudaosoft.com --server https://acme-v02.api.letsencrypt.org/directory
 
 
 certbot renew --deploy-hook "systemctl reload nginx"
