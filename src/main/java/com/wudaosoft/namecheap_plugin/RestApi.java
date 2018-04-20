@@ -204,7 +204,7 @@ public class RestApi {
 		model.put("Host", host);
 		model.put("Data", value);
 		model.put("RecordType", recordType);
-		model.put("Ttl", 1799);
+		model.put("Ttl", 120);
 		
 		params.put("model", model);
 		params.put("domainName", domainName);
