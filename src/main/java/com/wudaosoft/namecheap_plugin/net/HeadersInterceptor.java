@@ -80,7 +80,7 @@ public class HeadersInterceptor implements HttpRequestInterceptor {
 			referer = !referer.startsWith("http") ? origin + referer : referer;
 		}
 		
-		request.setHeader("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/64.0.3282.167 Safari/537.36");
+		request.setHeader("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/73.0.3683.103 Safari/537.36");
 	}
 
 }
