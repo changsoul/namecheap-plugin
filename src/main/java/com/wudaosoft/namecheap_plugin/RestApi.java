@@ -125,14 +125,13 @@ public class RestApi {
                 if (status != 301 && status != 302)
                     return null;
 
-                String loc = response.getLastHeader("Location").getValue();
-                return loc;
+                return response.getLastHeader("Location").getValue();
             }
         });
         
         System.out.println("local:" + local);
 
-        return !local.contains("login");
+        return local != null && !local.contains("login");
     }
 
     public String getAdvancedDnsListPage(String domainName) throws Exception {
